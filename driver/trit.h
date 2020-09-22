@@ -52,10 +52,10 @@ char *trit_to_string(utrit trit) {
 }
 
 void set(tritlist *list, unsigned trit, utrit value) {
-    if(!list || trit >= list->size) return;    
+    if(!list) return;    
     unsigned byte = trit / (CHAR_BIT / TRIT_BIT);
-    unsigned bit = CHAR_BIT - (trit * TRIT_BIT - byte * CHAR_BIT) - 1;
-    switch (value) {
+    unsigned bit = CHAR_BIT - 1 - trit * TRIT_BIT % CHAR_BIT;
+    switch(value) {
         case FAX:
             list->trits[byte] &= ~(1 << bit);
             list->trits[byte] &= ~(1 << bit - 1);
@@ -73,33 +73,32 @@ void set(tritlist *list, unsigned trit, utrit value) {
 
 void put(tritlist **list, unsigned trit, utrit value) {
     if(!list) return;
-    
-    if(trit >= (*list)->size) {
-        if((*list)->size / (CHAR_BIT / TRIT_BIT) <
-            (trit + 1) / (CHAR_BIT / TRIT_BIT) + 1) {
+    if(trit >= (*list)->size * (CHAR_BIT / TRIT_BIT)) {
+        unsigned listBytes = ((*list)->size > 0) * (((*list)->size - 1) / (CHAR_BIT / TRIT_BIT) + 1);
+        unsigned requiredBytes = trit / (CHAR_BIT / TRIT_BIT) + 1;
+
+        if(listBytes < requiredBytes) {
             tritlist *a = new_tritlist();
             a->size = trit + 1;
-            a->trits = malloc(((trit + 1) / (CHAR_BIT / TRIT_BIT) + 1) * sizeof(unsigned char));
+            a->trits = calloc(requiredBytes, sizeof(unsigned char));
+            
             int i;
-            for(i = 0; i < (*list)->size / (CHAR_BIT / TRIT_BIT); i++)
+            for(i = 0; i < listBytes; i++)
                 a->trits[i] = (*list)->trits[i];
-            
-            for(i = (*list)->size * TRIT_BIT; i < a->size * TRIT_BIT; i++)
-                a->trits[i / CHAR_BIT] &= ~(1 << (CHAR_BIT - 1 - (i % CHAR_BIT)));
-            
+
             free((*list)->trits);
             free(*list);
             *list = a;
         } else (*list)->size = trit + 1;
-    }
+    }	
     set(*list, trit, value);
 }
 
 utrit get(tritlist *list, unsigned trit) {
-    trit *= TRIT_BIT;
-    if(list->trits[trit / CHAR_BIT] & (1 << (CHAR_BIT - 1 - (trit % CHAR_BIT))))
-        return FIX;
-    if(list->trits[(trit + 1) / CHAR_BIT] & (1 << (CHAR_BIT - 1 - (trit + 1) % CHAR_BIT)))
+    if(!list) return -1;
+    if(list->trits[trit / (CHAR_BIT / TRIT_BIT)] & (1 << CHAR_BIT - 1 - trit * TRIT_BIT % CHAR_BIT))
         return FOX;
+    if(list->trits[trit / (CHAR_BIT / TRIT_BIT)] & (1 << CHAR_BIT - 1 - trit * TRIT_BIT % CHAR_BIT - 1))
+        return FIX;
     return FAX;
 }
