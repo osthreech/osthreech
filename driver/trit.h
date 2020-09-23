@@ -15,31 +15,28 @@
 
 #define TRIT_BIT 2
 
+// Unbalanced trit struct
 typedef enum _utrit {
     FAX,
     FIX,
     FOX
 } utrit;
 
+// Balanced trit struct
 typedef enum _btrit {
-    FALSE,
+    FALSE = -1,
     UNKNOWN,
     TRUE
 } btrit;
 
-typedef struct _tritlist {
-    unsigned char *trits;
-    unsigned size;
-} tritlist;
-
-tritlist *new_tritlist() {
-    tritlist *a = malloc(sizeof(tritlist));
-    a->trits = NULL;
-    a->size = 0;
-    return a;
+// Euclidean modulo for negative integers
+unsigned nmod(int x, int y){
+    int a = x % y;
+    return a + y * (a < 0);
 }
 
-char *trit_to_string(utrit trit) {
+// Unbalanced trit to string
+char *utrit_to_string(utrit trit) {
     switch(trit) {
         case FAX:
         return "FAX";
@@ -51,54 +48,40 @@ char *trit_to_string(utrit trit) {
     return NULL;
 }
 
-void set(tritlist *list, unsigned trit, utrit value) {
-    if(!list) return;    
-    unsigned byte = trit / (CHAR_BIT / TRIT_BIT);
-    unsigned bit = CHAR_BIT - 1 - trit * TRIT_BIT % CHAR_BIT;
-    switch(value) {
-        case FAX:
-            list->trits[byte] &= ~(1 << bit);
-            list->trits[byte] &= ~(1 << bit - 1);
-        break;
-        case FIX:
-            list->trits[byte] &= ~(1 << bit);
-            list->trits[byte] |= 1 << bit - 1;
-        break;
-        case FOX:
-            list->trits[byte] |= 1 << bit;
-            list->trits[byte] &= ~(1 << bit - 1);
-        break;
+// Balanced trit to string
+char *btrit_to_string(btrit trit) {
+    switch(trit) {
+        case FALSE:
+        return "false";
+        case UNKNOWN:
+        return "unknown";
+        case TRUE:
+        return "true";
     }
+    return NULL;
 }
 
-void put(tritlist **list, unsigned trit, utrit value) {
-    if(!list) return;
-    if(trit >= (*list)->size * (CHAR_BIT / TRIT_BIT)) {
-        unsigned listBytes = ((*list)->size > 0) * (((*list)->size - 1) / (CHAR_BIT / TRIT_BIT) + 1);
-        unsigned requiredBytes = trit / (CHAR_BIT / TRIT_BIT) + 1;
-
-        if(listBytes < requiredBytes) {
-            tritlist *a = new_tritlist();
-            a->size = trit + 1;
-            a->trits = calloc(requiredBytes, sizeof(unsigned char));
-            
-            int i;
-            for(i = 0; i < listBytes; i++)
-                a->trits[i] = (*list)->trits[i];
-
-            free((*list)->trits);
-            free(*list);
-            *list = a;
-        } else (*list)->size = trit + 1;
-    }	
-    set(*list, trit, value);
+// Balance trit
+btrit balance(utrit trit) {
+    return nmod(trit, 3) - 1;
 }
 
-utrit get(tritlist *list, unsigned trit) {
-    if(!list) return -1;
-    if(list->trits[trit / (CHAR_BIT / TRIT_BIT)] & (1 << CHAR_BIT - 1 - trit * TRIT_BIT % CHAR_BIT))
-        return FOX;
-    if(list->trits[trit / (CHAR_BIT / TRIT_BIT)] & (1 << CHAR_BIT - 1 - trit * TRIT_BIT % CHAR_BIT - 1))
-        return FIX;
-    return FAX;
+// Unbalance trit
+utrit unbalance(btrit trit) {
+    return nmod(trit + 1, 3);
+}
+
+// Negate trit
+btrit negate(btrit trit) {
+    return trit * -1;
+}
+
+// Increment trit
+btrit increment(btrit trit) {
+    return balance(unbalance(trit) + 1);
+}
+
+// Decrement trit
+btrit decrement(btrit trit) {
+    return balance(unbalance(trit) - 1);
 }
