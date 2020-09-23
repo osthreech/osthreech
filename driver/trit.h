@@ -78,10 +78,41 @@ btrit negate(btrit trit) {
 
 // Increment trit
 btrit increment(btrit trit) {
-    return balance(unbalance(trit) + 1);
+    return balance(unbalance(trit + 1));
 }
 
 // Decrement trit
 btrit decrement(btrit trit) {
-    return balance(unbalance(trit) - 1);
+    return balance(unbalance(trit - 1));
 }
+
+// Check if trit is true
+btrit is_true(btrit trit) {
+    utrit u = unbalance(trit);
+    return balance(2 * ((u & 2) >> 1 & (~u & 1)));
+}
+
+// Check if trit is false
+btrit is_false(btrit trit) {
+    utrit u = unbalance(trit);
+    return balance(2 * ((~u & 2) >> 1 & (~u & 1)));
+}
+
+// Check if trit is unknown
+btrit is_unknown(btrit trit) {
+    utrit u = unbalance(trit);
+    return balance(2 * ((~u & 2) >> 1 & (u & 1)));
+}
+
+// Clamp trit down
+btrit clamp_down(btrit trit) {
+    utrit u = unbalance(trit);
+    return balance(((u & 2) >> 1 | (u & 1)));
+}
+
+// Clamp trit up
+btrit clamp_up(btrit trit) {
+    utrit u = unbalance(trit);
+    return balance(((~u & 2) >> 1) + 2 * ((u & 2) >> 1));
+}
+
