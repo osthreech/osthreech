@@ -41,7 +41,7 @@ void set(tritlist *list, unsigned trit, utrit value) {
 // Put trit on list
 void put(tritlist **list, unsigned trit, utrit value) {
     if(!list) return;
-    if(trit >= (*list)->size * (CHAR_BIT / TRIT_BIT)) {
+    if(trit >= (*list)->size) {
         unsigned listBytes = ((*list)->size > 0) * (((*list)->size - 1) / (CHAR_BIT / TRIT_BIT) + 1);
         unsigned requiredBytes = trit / (CHAR_BIT / TRIT_BIT) + 1;
 
