@@ -177,7 +177,7 @@ btrit clamp_up(btrit b) {
 
 // Min or And
 // zw  00 01 11 10
-// xy |------------
+// xy  -----------
 // 00 | 0  0  X  0
 // 01 | 0  1  X  1
 // 11 | X  X  X  X
@@ -195,7 +195,7 @@ btrit and(btrit b1, btrit b2) {
 
 // Max or Or
 // zw  00 01 11 10
-// xy |------------
+// xy  -----------
 // 00 | 0  1  X  2
 // 01 | 1  1  X  2
 // 11 | X  X  X  X
@@ -213,7 +213,7 @@ btrit or(btrit b1, btrit b2) {
 
 // Antimin or Nand
 // zw  00 01 11 10
-// xy |------------
+// xy  -----------
 // 00 | 2  2  X  2
 // 01 | 2  1  X  1
 // 11 | X  X  X  X
@@ -231,7 +231,7 @@ btrit nand(btrit b1, btrit b2) {
 
 // Antimax or Nor
 // zw  00 01 11 10
-// xy |------------
+// xy  -----------
 // 00 | 2  1  X  0
 // 01 | 1  1  X  0
 // 11 | X  X  X  X
