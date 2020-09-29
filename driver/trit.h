@@ -172,7 +172,7 @@ btrit clamp_up(btrit b) {
     utrit u = unbalance(b);
     unsigned char x;
     x = bit(u, 1);
-    return balance((x^1) + 2*x);
+    return balance(2*x + (x^1));
 }
 
 // Min or And
@@ -190,7 +190,7 @@ btrit and(btrit b1, btrit b2) {
     y = bit(u1, 0);
     z = bit(u2, 1);
     w = bit(u2, 0);
-    return balance(y*(w + z) + x*(2*z + w));
+    return balance(x*(2*z + w) + y*(w + z));
 }
 
 // Max or Or
@@ -208,7 +208,7 @@ btrit or(btrit b1, btrit b2) {
     y = bit(u1, 0);
     z = bit(u2, 1);
     w = bit(u2, 0);
-    return balance((x^1)*w + y*(z^1)*(w^1) + 2*(x + z*(x^1)));
+    return balance(2*(x + z*(x^1)) + (x^1)*w + y*(z^1)*(w^1));
 }
 
 // Antimin or Nand
@@ -245,4 +245,94 @@ btrit nor(btrit b1, btrit b2) {
     z = bit(u2, 1);
     w = bit(u2, 0);
     return balance((z^1)*(w^1)*(y + 2*(x^1)*(y^1)) + (x^1)*w);
+}
+
+// Exclusive Or or Xor
+// zw  00 01 11 10
+// xy  -----------
+// 00 | 0  1  X  2
+// 01 | 1  1  X  1
+// 11 | X  X  X  X
+// 10 | 2  1  x  0
+btrit xor(btrit b1, btrit b2) {
+    utrit u1 = unbalance(b1);
+    utrit u2 = unbalance(b2);
+    unsigned char x, y, z, w;
+    x = bit(u1, 1);
+    y = bit(u1, 0);
+    z = bit(u2, 1);
+    w = bit(u2, 0);
+    return balance(2*(x*(z^1)*(w^1) + (x^1)*(y^1)*z) + w + y*(w^1));
+}
+
+// Sum
+// zw  00 01 11 10
+// xy  -----------
+// 00 | 2  0  X  1
+// 01 | 0  1  X  2
+// 11 | X  X  X  X
+// 10 | 1  2  x  0
+btrit sum(btrit b1, btrit b2) {
+    utrit u1 = unbalance(b1);
+    utrit u2 = unbalance(b2);
+    unsigned char x, y, z, w;
+    x = bit(u1, 1);
+    y = bit(u1, 0);
+    z = bit(u2, 1);
+    w = bit(u2, 0);
+    return balance(2*(y*z + x*w + (x^1)*(y^1)*(z^1)*(w^1)) + w*y + x*(z^1)*(w^1) + (x^1)*(y^1)*z);
+}
+
+// Consensus
+// zw  00 01 11 10
+// xy  -----------
+// 00 | 0  1  X  1
+// 01 | 1  1  X  1
+// 11 | X  X  X  X
+// 10 | 1  1  x  2
+btrit cons(btrit b1, btrit b2) {
+    utrit u1 = unbalance(b1);
+    utrit u2 = unbalance(b2);
+    unsigned char x, y, z, w;
+    x = bit(u1, 1);
+    y = bit(u1, 0);
+    z = bit(u2, 1);
+    w = bit(u2, 0);
+    return balance(2*(x*z) + (z^1)*(w^1)*(x + y) + w + (x^1)*z);
+}
+
+// Accept Anything
+// zw  00 01 11 10
+// xy  -----------
+// 00 | 0  0  X  1
+// 01 | 0  1  X  2
+// 11 | X  X  X  X
+// 10 | 1  2  x  2
+btrit any(btrit b1, btrit b2) {
+    utrit u1 = unbalance(b1);
+    utrit u2 = unbalance(b2);
+    unsigned char x, y, z, w;
+    x = bit(u1, 1);
+    y = bit(u1, 0);
+    z = bit(u2, 1);
+    w = bit(u2, 0);
+    return balance(2*(x*(z + w) + y*z) + y*w + (x^1)*(y^1)*z + x*(z^1)*(w^1));
+}
+
+// Comparison
+// zw  00 01 11 10
+// xy  -----------
+// 00 | 2  0  X  0
+// 01 | 0  2  X  0
+// 11 | X  X  X  X
+// 10 | 0  0  x  2
+btrit comp(btrit b1, btrit b2) {
+    utrit u1 = unbalance(b1);
+    utrit u2 = unbalance(b2);
+    unsigned char x, y, z, w;
+    x = bit(u1, 1);
+    y = bit(u1, 0);
+    z = bit(u2, 1);
+    w = bit(u2, 0);
+    return balance(2*(y*w + x*z + (x^1)*(y^1)*(z^1)*(w^1)));
 }
